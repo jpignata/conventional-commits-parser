@@ -18,7 +18,7 @@ describe Parser do
 
     it { expect(commit.type).to eq(:feat) }
     it { expect(commit.subject).to eq('New API') }
-    it { expect(commit.breaking).to eq('New API') }
+    it { expect(commit.breaking_change).to eq('New API') }
   end
 
   context 'a one-line commit message with a scope' do
@@ -40,7 +40,7 @@ describe Parser do
 
     it { expect(commit.type).to eq(:feat) }
     it { expect(commit.subject).to eq('completely refactor the API') }
-    it { expect(commit.breaking).to eq('The old API won\'t work, sry.') }
+    it { expect(commit.breaking_change).to eq('The old API won\'t work, sry.') }
     it { expect(commit.footer.size).to eq(1) }
     it { expect(commit.footer['BREAKING CHANGE']).to eq('The old API won\'t work, sry.') }
   end

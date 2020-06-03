@@ -36,7 +36,7 @@ logs.each do |msg|
   end
 end
 
-if commits.breaking?
+if commits.breaking_change?
   version = [version[0] + 1, 0, 0]
 elsif commits.feat?
   version = [version[0], version[1] + 1, 0]

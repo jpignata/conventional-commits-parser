@@ -13,8 +13,8 @@ class Commits
     @commits.push(commit)
   end
 
-  def breaking?
-    @commits.any? { |commit| !commit.breaking.nil? }
+  def breaking_change?
+    @commits.any?(&:breaking_change?)
   end
 
   def feat?

@@ -7,8 +7,9 @@ class Parser
   attr_reader :commit
 
   def initialize(msg)
-    @msg = StringScanner.new(msg.strip)
+    @breaking_change = false
     @commit = Commit.new
+    @msg = StringScanner.new(msg.strip)
   end
 
   def parse
@@ -20,7 +21,6 @@ class Parser
 
   private
 
-  attr_accessor :has_breaking_changes
   attr_reader :msg
 
   def read_type_and_scope
@@ -34,7 +34,7 @@ class Parser
         commit.scope = msg.scan(/[^\)]+/)
         msg.skip_until(/\): /)
       when '!'
-        self.has_breaking_changes = true
+        breaking_change!
         msg.skip_until(/: /)
       when ':'
         msg.getch
@@ -45,7 +45,7 @@ class Parser
   def read_subject
     line = msg.scan(/[^\n]+/)
     commit.subject = line
-    commit.breaking = line if has_breaking_changes
+    commit.breaking_change = line if breaking_change?
     msg.getch
   end
 
@@ -71,7 +71,7 @@ class Parser
       value = read_until_footer_key
 
       if key.match?(/BREAKING CHANGE/)
-        commit.breaking = value
+        commit.breaking_change = value
         commit.footer['BREAKING CHANGE'] = value
       elsif key.end_with?('#')
         commit.footer[key[0..-3]] = '#' + value
@@ -79,5 +79,13 @@ class Parser
         commit.footer[key[0..-3]] = value
       end
     end
+  end
+
+  def breaking_change?
+    @breaking_change
+  end
+
+  def breaking_change!
+    @breaking_change = true
   end
 end
