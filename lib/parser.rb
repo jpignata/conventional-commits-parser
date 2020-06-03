@@ -71,6 +71,7 @@ class Parser
       value = read_until_footer_key
 
       if key.match?(/BREAKING CHANGE/)
+        breaking_change!
         commit.breaking_change = value
         commit.footer['BREAKING CHANGE'] = value
       elsif key.end_with?('#')
