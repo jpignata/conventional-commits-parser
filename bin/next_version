@@ -1,0 +1,47 @@
+#!/usr/bin/env ruby
+
+$LOAD_PATH << 'lib'
+
+require 'open3'
+
+require 'parser'
+require 'commits'
+
+unless ARGV[0] && ARGV[1]
+  puts 'Usage: next_version [revision range] [current version]'
+  exit 0
+end
+
+stdout, stderr, status = Open3.capture3(
+  'git', 'log', '--pretty=%s%n%b%n<|>', '--reverse', ARGV[0]
+)
+
+if status.exitstatus != 0
+  puts "Couldn't fetch git log: "
+  puts stderr
+  exit status.exitstatus
+end
+
+version = ARGV[1].split('.').map(&:to_i)
+commits = Commits.new
+logs = stdout.split('<|>')
+
+logs.each do |msg|
+  msg.strip!
+
+  if msg.length > 0
+    parser = Parser.new(msg)
+    parser.parse
+    commits.push(parser.commit)
+  end
+end
+
+if commits.breaking?
+  version = [version[0] + 1, 0, 0]
+elsif commits.feat?
+  version = [version[0], version[1] + 1, 0]
+else
+  version = [version[0], version[1], version[2] + 1]
+end
+
+puts version.join('.')
